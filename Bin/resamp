@@ -1,0 +1,80 @@
+#!/usr/bin/python3
+""" Sinc : 1D sinc interpolation """
+
+from __future__ import print_function
+from math import *
+import sys
+import argparse
+import numpy as np
+import babin as ba
+
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
+def resamp(din,dout) :
+    l = 20
+    pi =3.14159
+    eps=1.0e-09
+    n1 = np.size(din)
+    n1out = np.size(dout)
+    dout=np.fft.irfft(np.fft.rfft(din), n1out)
+    return(dout)
+
+
+
+# Define options
+
+#---------------------------------------------------------------------
+#Hack for negative floats as option
+for i, arg in enumerate(sys.argv):
+  if (arg[0] == '-') and arg[1].isdigit(): sys.argv[i] = ' ' + arg
+#---------------------------------------------------------------------
+parser = argparse.ArgumentParser(description="program to window a binary cube")
+parser.add_argument("fin",help="Input binary file")
+parser.add_argument("fout",help="Output binary file")
+parser.add_argument("-n1",dest="n1",type=int,help="First Dimension of data")
+parser.add_argument("-n2",dest="n2",type=int,help="Second Dimension of data")
+parser.add_argument("-d1",dest="d1",type=float,help="Input sampling interval")
+parser.add_argument("-d1out",dest="d1out",type=float,help="Output sampling interval")
+
+#Parse arguments
+args = parser.parse_args()
+
+# Axis
+if args.n1 is not None:
+    n1 = args.n1
+else :
+    sys.exit("Missing n1!")
+
+if args.n2 is not None:
+    n2 = args.n2
+else :
+    n2 = 1
+
+if args.d1 is not None:
+    d1 = args.d1
+else :
+    sys.exit("Missing d1!")
+
+if args.d1out is not None:
+    d1out = args.d1out
+else :
+    sys.exit("Missing d1out!")
+
+
+#Get the data
+fin = ba.bin(args.fin)
+din=fin.read((n2,n1))
+fout = ba.bin(args.fout,'w')
+n1out = int(((n1-1)*d1)/d1out)+1
+print( "n1out: ", n1out)
+dout=np.zeros((n2,n1out))
+
+#Resample the data
+for i in range(0,n2) :
+    dout[i,:] = (d1/d1out)*resamp(din[i,:], dout[i,:])
+ 
+#write the data
+fout.write(dout)
+
+
