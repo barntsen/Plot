@@ -64,4 +64,5 @@ cp pltcom.py $inst
 cp pltcom.py $inst
 cp babin.py $inst 
 cp barsf.py $inst 
-cp colors.py $inst
+cp bacolmaps.py $inst
+cp cpt.py   $inst

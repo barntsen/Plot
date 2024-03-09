@@ -163,5 +163,5 @@ win = data[f3:f3+l3:i3,f2:f2+l2:i2,f1:f1+l1:i1]
 fout = ba.bin(args.fout,"w")
 fout.write(win)
 
-eprint("** window: output n1 n2 n3: ",win.shape[0], win.shape[1], win.shape[2])
+eprint("** window: output n3 n2 n1: ",win.shape[0], win.shape[1], win.shape[2])
 
