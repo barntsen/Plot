@@ -34,6 +34,8 @@ parser.add_argument("-n1",dest="n1",type=int,help="No of data points")
 parser.add_argument("-n2",dest="n2",type=int,help="No of graphs")
 parser.add_argument("-d1",dest="d1",type=float,help="Sampling interval along x-axis")
 parser.add_argument("-o1",dest="o1",type=float,help="Sampling interval along x-axis")
+parser.add_argument("-t",dest="t",action='store_true',
+                      help="Transpose x and y axis is this option is present")
 
 #Parse arguments
 args = parser.parse_args()
@@ -59,7 +61,6 @@ if args.o1 is not None:
 else:
     o1=0.0
 
-
 #Load the data
 fin = ba.bin(args.fname)
 data=fin.read((n2,n1))
@@ -70,10 +71,17 @@ if  args.normalize is not None:
     datamax = abs(data).max();
     data = data/datamax
 
-ymin = np.amin(data)
-ymax = np.amax(data)
-xmin = o1
-xmax = o1+d1*n1
+if args.t is False :
+  ymin = np.amin(data)
+  ymax = np.amax(data)
+  xmin = o1
+  xmax = o1+d1*n1
+else :
+  xmin = np.amin(data)
+  xmax = np.amax(data)
+  ymin = o1+d1*n1
+  ymax = o1
+
 ar   = 1.0
 
 if args.xmin is not None:
@@ -87,8 +95,12 @@ if args.ymax is not None:
 if args.ar is not None:
     ar = args.ar
 
-x = np.zeros((n1))
-x = np.linspace(xmin,xmax,n1)
+if args.t is True :
+  x = np.zeros((n1))
+  x = np.linspace(ymin,ymax,n1)
+else :
+  x = np.zeros((n1))
+  x = np.linspace(xmin,xmax,n1)
 
 # Plotting
 pl.figure()
@@ -104,12 +116,18 @@ if args.ylog == True :
 if args.legend is not None:
     l=0
     for s in args.legend:
-        pl.plot(x,data[l,:], label=args.legend[l])
+        if args.t is True :
+          pl.plot(np.flip(data[l,:]),x, label=args.legend[l])
+        else :
+          pl.plot(x,data[l,:], label=args.legend[l])
         l=l+1
         pl.legend(loc="upper right")
 else:
     for l in range(0,n2):
-        pl.plot(x,data[l,:])
+        if args.t is True  :
+          pl.plot(np.flip(data[l,:]),x)
+        else :
+          pl.plot(x,data[l,:])
 
 # Set apsect ratio
 ax=pl.gca()
@@ -126,7 +144,6 @@ if args.ylabel is not None:
     pl.ylabel(args.ylabel)
 if args.out is not None:
     pl.savefig(args.out,bbox_inches='tight')
-1
 if args.noshow is False:
     pl.show()
 

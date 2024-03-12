@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import babin as ba
 import matplotlib.animation as animation
 import parula
+import bacolmaps
 from pltcom import *
 
 def updatefig(*args):
@@ -123,6 +124,8 @@ parser.add_argument("-o",dest="out",
            help="output graphics file")
 parser.add_argument("-title",dest="title",
            help="Title of plot, default: None")
+parser.add_argument("-cbtitle",dest="cbtitle",
+           help="Color bar title, default: None")
 parser.add_argument("-xlabel",dest="xlabel",
            help="x-axis label, default: None")
 parser.add_argument("-ylabel",dest="ylabel",
@@ -131,6 +134,10 @@ parser.add_argument("-cmax",dest="cmax",type=float,
            help="Maximum clip value")
 parser.add_argument("-cmin",dest="cmin",type=float,
            help="Minimum clip value")
+parser.add_argument("-cbmax",dest="cbmax",type=float,
+           help="Maximum background velocity")
+parser.add_argument("-cbmin",dest="cbmin",type=float,
+           help="Minimum background velocity")
 parser.add_argument("-ar",dest="ar",type=float,
            help="Aspect ratio, default: 1.0")
 parser.add_argument("fname",
@@ -142,8 +149,8 @@ parser.add_argument("-bias",dest="bias",default=0.0,type=float,
            help="add a constant to the data, default: 0.0")
 parser.add_argument("-colormap",dest="colormap",default="gray",
            help="Color map, default: grey scale")
-parser.add_argument("-bgcolormap",dest="bgcolormap",default="parula",
-           help="Background color map, default: parula")
+parser.add_argument("-bgcolormap",dest="bgcolormap",default="jet",
+           help="Background color map, default: jet")
 parser.add_argument("-pclip",dest="pclip",type=float,
            help="percentile clip in percent (default 99 percent)")
 parser.add_argument("-clip",dest="clip",type=float,
@@ -231,6 +238,10 @@ if args.flip is not None:
 else :
     flip = 0
     
+#First install custom colormaps
+bacolmaps.cmap('crust')
+parula.setcolors()
+
 #Get the data
 fin = ba.bin(args.fname)
 data=fin.read((n3,n2,n1))
@@ -251,6 +262,20 @@ amps = absmax(data)
 mindata = amps[0]
 maxdata = amps[1]
 absdata = amps[2]
+
+if background is True:
+  cbg = absmax(bg);
+
+  if(args.cbmin == None):
+    cbmin = cbg[0]
+  else :
+    cbmin=args.cbmin
+
+  if(args.cbmax == None):
+    cbmax = cbg[1]
+  else :
+    cbmax = args.cbmax
+  print( "=== min,max,absmax values of velocity:", cbg)
 
 print( "=== min,max,absmax values of data:", amps)
 
@@ -290,8 +315,11 @@ inc = 1 #Increment between frames
 animrun=True   #If true, movie runse
 #Figure to animate
 
+
 fig = plt.figure()
-parula.setcolors()
+
+#Colors
+
 img = data[cnt,:,:]
 
 #Setup for keyclick
@@ -303,7 +331,8 @@ im=plt.imshow(img,interpolation='nearest',clim=(cmin,cmax),
 
 #Plot background model
 if background == True :
-    vl=plt.imshow(bg,interpolation='nearest',alpha=args.trans,
+    print(args.bgcolormap)
+    vl=plt.imshow(bg,interpolation='nearest',clim=(cbmin,cbmax),alpha=args.trans,
     extent=[o1,o1+d1*n1,o2+d2*n2,o2],cmap=args.bgcolormap, animated=True)
 
 #Set sensible aspcet ratio (The logic behind the aspect ratio this is weird)
@@ -317,6 +346,8 @@ if args.xlabel is not None:
     plt.xlabel(args.xlabel)
 if args.ylabel is not None:
     plt.ylabel(args.ylabel)
+#if args.cbtitle is not None:
+#   cbar.ax.set_title(args.cbtitle)
 
 #
 # Start the animation loop, frames are updated by calling updatefig
