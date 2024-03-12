@@ -9,86 +9,29 @@ import sys
 import argparse
 import numpy as np
 import parula
-import cpt
 import bacolmaps
 import babin as ba
 from pltcom import *
+import RSSPython as rs
 
+## Get command line options
 
-#--------------------------------------------------------------------
-#Get command line options
-#---------------------------------------------------------------------
-#Hack for negative floats as option
+# Hack for negative floats as option
 for i, arg in enumerate(sys.argv):
   if (arg[0] == '-') and arg[1].isdigit(): sys.argv[i] = ' ' + arg
-parser = argparse.ArgumentParser(description="Script for plotting  2D seismic data and velocity models")
-parser.add_argument("-o",dest="out",
-                         help="Output graphics file")
-parser.add_argument("-title",dest="title",
-                         help="Plot title")
-parser.add_argument("-xlabel",dest="xlabel",
-                         help="x-axis label")
-parser.add_argument("-ylabel",dest="ylabel",
-                         help="y-axis label")
-parser.add_argument("-cmin",dest="cmin",type=float,
-                        help="Minimum clip value")
-parser.add_argument("-cmax",dest="cmax",type=float,
-                        help="Maximum clip value")
-parser.add_argument("-ar",dest="ar",type=float,
-                        help="Aspect ratio")
-parser.add_argument("fname",
-                        help="Input binary 2D file")
-parser.add_argument("-bias",dest="bias",default=0.0,type=float,
-                        help="Add a constant to the data")
-parser.add_argument("-colormap",dest="colormap",default="gray",
-                        help="matplotlib standard colormaps + new map: parula")
-parser.add_argument("-bcolormap",dest="bcolormap",default="jet",
-                        help="matplotlib standard colormaps + new map: parula")
-parser.add_argument("-pclip",dest="pclip",type=float,
-                        help="percentile clip in percentage (default 99)")
-parser.add_argument("-clip",dest="clip",type=float,
-                        help="clip in percentage of max value")
-parser.add_argument("-n1",dest="n1",type=int,default=-1,
-                        help="First dimension of data")
-parser.add_argument("-n2",dest="n2",type=int,default=-1,
-                        help="Second dimension of data")
-parser.add_argument("-d1",dest="d1",type=float,default=1.0,
-                        help="First dimension sampling interval")
-parser.add_argument("-d2",dest="d2",type=float,default=1.0,
-                        help="Second dimension sampling interval")
-parser.add_argument("-o1",dest="o1",type=float,default=0.0,
-                        help="First dimension origo")
-parser.add_argument("-o2",dest="o2",type=float,default=0.0,
-                        help="Second dimension origo")
-parser.add_argument("-t",dest="t",action='store_true',
-                        help="transpose data if this option is present")
-parser.add_argument("-noshow",dest="noshow",action='store_true',
-                      help="turn off plotting to screen if this option is present")
-parser.add_argument("-colorbar",dest="colorbar",action='store_true',
-                      help="plot colorbar if this option is present:")
-parser.add_argument("-fb",dest="fb",
-                      help="input binary background file. There is no scaling of the background")
-parser.add_argument("-trans",dest="trans",type=float,default=0.25,
-                      help="transparency default: 0.25")
-parser.add_argument("-cbtitle",dest="cbtitle",
-                         help="Plot title")
-parser.add_argument("-mx",dest="mx",
-                         help="Marker x-ccordinate")
-parser.add_argument("-my",dest="my",
-                         help="Marker y-ccordinate")
-parser.add_argument("-mark",dest="mark",
-                         help="Marker at position -mx,-my")
-parser.add_argument("-fxy",dest="fxy",
-                         help="File containing xy graph")
 
-#Parse arguments
+# Heading
+parser = argparse.ArgumentParser(description="Script for plotting  2D seismic data and velocity models")
+
+parser = comargs(parser)
+# Parse arguments
 args = parser.parse_args()
 
 # Axis
 if args.n1 is not None:
     n1 = args.n1
 else :
-    print( "Missing n1!")
+    n1 = -1
 
 if args.d1 is not None:
     d1 = args.d1
@@ -103,7 +46,7 @@ else :
 if args.n2 is not None:
     n2 = args.n2
 else :
-    print( "Missing n2!")
+    n2 = -1
 
 if args.d2 is not None:
     d2 = args.d2
@@ -122,23 +65,15 @@ else:
 
 #First install custom colormaps
 bacolmaps.cmap('crust')
-bacolmaps.cmap('globe')
 parula.setcolors()
 
+
 #Get the data
-fin = ba.bin(args.fname)
-data=fin.read((n2,n1))
+data =getdata(args.fname,n1,n2)
 
 #Get the background image 
 if args.fb is not None :
-    fin = ba.bin(args.fb)
-    bg=fin.read((n2,n1))
-
-#Get the xy graph
-if args.fxy is not None:
-   graph=np.loadtxt(args.fxy)
-   gx = graph[:,0]  
-   gy = graph[:,1]  
+    bg=getdata(args.fname)
 
 if(transp == 1):
     data=data.transpose()
@@ -204,19 +139,9 @@ fig =pl.figure()
 #pl.xlim(o1,o1+d1*(n1-1))
 #pl.ylim(o2+d2*(n2-1),o2)
 
-#Plot marker
-if args.mark is not None :
-    pl.annotate('*',(args.mx,args.my))
-
-#Plot grah
-if args.fxy is not None:
-   pl.plot(gx,gy)
-
 #Plot data array
 im=pl.imshow(data,clim=(cmin,cmax),cmap=args.colormap,
           extent=[o1,o1+d1*n1,o2+d2*n2,o2])  
-if args.colorbar is not None : 
-    cbar=pl.colorbar(im,fraction=0.02, pad=0.04)
 
 #Plot also background array
 if args.fb is not None :
@@ -229,6 +154,8 @@ print("Bounding box:",o1,o1+d1*n1,o2+d2*n2,o2)
 ax=pl.gca()
 asr = 1.0/(ax.get_data_ratio()*ar)
 pl.Axes.set_aspect(ax,asr)
+if args.colorbar is not None : 
+    cbar=pl.colorbar(im,fraction=0.02, pad=0.04)
 
 
 #Title and axis decorations
