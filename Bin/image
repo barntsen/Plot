@@ -72,12 +72,16 @@ parser.add_argument("-trans",dest="trans",type=float,default=0.25,
                       help="transparency default: 0.25")
 parser.add_argument("-cbtitle",dest="cbtitle",
                          help="Plot title")
-parser.add_argument("-mx",dest="mx",
-                         help="Marker x-ccordinate")
-parser.add_argument("-my",dest="my",
-                         help="Marker y-ccordinate")
-parser.add_argument("-mark",dest="mark",
-                         help="Marker at position -mx,-my")
+parser.add_argument("-x0",dest="x0",type=float,action="append",
+                         help="Textbox x-ccordinate")
+parser.add_argument("-y0",dest="y0",type=float,action="append",
+                         help="Textbox y-ccordinate")
+parser.add_argument("-x",dest="x",type=float,action="append",
+                         help="Arrow tip x-coordinate")
+parser.add_argument("-y",dest="y",type=float,action="append",
+                         help="Arrow tip y-ccordinate")
+parser.add_argument("-textbox",dest="textbox",action="append",
+                         help="Textbox at position -x0,-y0, arrow tip at -x -y")
 parser.add_argument("-fxy",dest="fxy",
                          help="File containing xy graph")
 
@@ -206,19 +210,25 @@ pl.cm.register_cmap(name='umed', cmap=cmap_vp)
 #pl.ylim(o2+d2*(n2-1),o2)
 
 #Plot marker
-if args.mark is not None :
-    pl.annotate('*',(args.mx,args.my))
+if args.textbox is not None :
+  i=0
+  for text in args.textbox :
+    x=args.x[i]; y=args.y[i]; x0=args.x0[i]; y0=args.y0[i]; 
 
+    pl.annotate(text ,xy=(x,y),
+              xytext=(x0,y0),bbox=dict(ec='black',fc='white', pad=5),
+              arrowprops=dict(arrowstyle="->"))
+    i=i+1
+  
 #Plot grah
 if args.fxy is not None:
    pl.plot(gx,gy)
 
 #Plot data array
+data=np.clip(data,cmin,cmax)
 im=pl.imshow(data,clim=(cmin,cmax),cmap=args.colormap,
-          extent=[o1,o1+d1*n1,o2+d2*n2,o2])  
+          extent=[o1,o1+d1*n1,o2+d2*n2,o2],interpolation='bilinear')  
 im.cmap.set_under('white')
-#im=pl.imshow(data,clim=(cmin,cmax),
-#          extent=[o1,o1+d1*n1,o2+d2*n2,o2])  
 
 
 #Plot also background array
