@@ -10,7 +10,8 @@ import sys
 import argparse
 import numpy as np
 import parula
-import colors
+import cpt
+import bacolmaps
 import babin as ba
 from pltcom import *
 
@@ -124,6 +125,11 @@ if args.t is True:
 else:
     transp = 0; 
 
+#First install custom colormaps
+bacolmaps.cmap('crust')
+bacolmaps.cmap('globe')
+parula.setcolors()
+
 #Get the data
 fin = ba.bin(args.fname)
 data=fin.read((n2,n1))
@@ -198,13 +204,7 @@ if args.bias is not None:
 # Plotting
 #-----------------------------------------------------------------------
 fig =pl.figure()
-#Install parula colormap
-parula.setcolors()
 
-#Install umed colormap
-clist = colors.get_hex_list(hex_list=1)
-cmap_vp =  colors.get_continuous_cmap(clist)
-pl.cm.register_cmap(name='umed', cmap=cmap_vp)
 
 #pl.xlim(o1,o1+d1*(n1-1))
 #pl.ylim(o2+d2*(n2-1),o2)
@@ -227,13 +227,13 @@ if args.fxy is not None:
 #Plot data array
 data=np.clip(data,cmin,cmax)
 im=pl.imshow(data,clim=(cmin,cmax),cmap=args.colormap,
-          extent=[o1,o1+d1*n1,o2+d2*n2,o2],interpolation='bilinear')  
-im.cmap.set_under('white')
-
+          extent=[o1,o1+d1*n1,o2+d2*n2,o2])  
+if args.colorbar is not None : 
+    cbar=pl.colorbar(im,fraction=0.02, pad=0.04)
 
 #Plot also background array
 if args.fb is not None :
-    pl.imshow(bg,alpha=args.trans,cmap=args.bcolormap,
+    pl.imshow(bg,alpha=args.trans,cmap=cmap_vp,
               extent=[o1,o1+d1*n1,o2+d2*n2,o2],interpolation='spline36')  
 print("Bounding box:",o1,o1+d1*n1,o2+d2*n2,o2)
 
@@ -242,8 +242,6 @@ print("Bounding box:",o1,o1+d1*n1,o2+d2*n2,o2)
 ax=pl.gca()
 asr = 1.0/(ax.get_data_ratio()*ar)
 pl.Axes.set_aspect(ax,asr)
-if args.colorbar is not None : 
-    cbar=pl.colorbar(im,fraction=0.02, pad=0.04)
 
 
 #Title and axis decorations
