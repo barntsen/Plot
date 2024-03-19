@@ -12,7 +12,7 @@ import parula
 import bacolmaps
 import babin as ba
 from pltcom import *
-import RSSPython as rs
+import rss as rs
 
 ## Get command line options
 
@@ -147,13 +147,13 @@ im=pl.imshow(data,clim=(cmin,cmax),cmap=args.colormap,
 if args.fb is not None :
     pl.imshow(bg,alpha=args.trans,cmap=cmap_vp,
               extent=[o1,o1+d1*n1,o2+d2*n2,o2],interpolation='spline36')  
-print("Bounding box:",o1,o1+d1*n1,o2+d2*n2,o2)
 
 
 #Set aspect ratio
 ax=pl.gca()
 asr = 1.0/(ax.get_data_ratio()*ar)
 pl.Axes.set_aspect(ax,asr)
+
 if args.colorbar is not None : 
     cbar=pl.colorbar(im,fraction=0.02, pad=0.04)
 

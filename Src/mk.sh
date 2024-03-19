@@ -65,4 +65,5 @@ cp pltcom.py $inst
 cp babin.py $inst 
 cp barsf.py $inst 
 cp bacolmaps.py $inst
+cp rss.py  $inst
 cp cpt.py   $inst
