@@ -72,16 +72,32 @@ parser.add_argument("-trans",dest="trans",type=float,default=0.25,
                       help="transparency default: 0.25")
 parser.add_argument("-cbtitle",dest="cbtitle",
                          help="Plot title")
-parser.add_argument("-x0",dest="x0",type=float,action="append",
+parser.add_argument("-xb0",type=float,action="append",
                          help="Textbox x-ccordinate")
-parser.add_argument("-y0",dest="y0",type=float,action="append",
+parser.add_argument("-yb0",type=float,action="append",
                          help="Textbox y-ccordinate")
-parser.add_argument("-x",dest="x",type=float,action="append",
+parser.add_argument("-xb",type=float,action="append",
                          help="Arrow tip x-coordinate")
-parser.add_argument("-y",dest="y",type=float,action="append",
+parser.add_argument("-yb",type=float,action="append",
                          help="Arrow tip y-ccordinate")
+parser.add_argument("-xt0",type=float,action="append",
+                         help="Text x-ccordinate")
+parser.add_argument("-yt0",type=float,action="append",
+                         help="Text y-ccordinate")
+parser.add_argument("-xt",type=float,action="append",
+                         help="Text arrow tip x-coordinate")
+parser.add_argument("-yt",type=float,action="append",
+                         help="Text arrow tip y-ccordinate")
 parser.add_argument("-textbox",dest="textbox",action="append",
-                         help="Textbox at position -x0,-y0, arrow tip at -x -y")
+                   help="Textbox at position -xb0,-yb0, arrow tip at -xb -yb") 
+parser.add_argument("-text",dest="text",action="append",
+                   help="Text at position -xt0,-yt0, arrow tip at -xt -yt")
+parser.add_argument("-textcol", dest="textcol",  action="append", 
+                   help="Text color at position -xb0,-yb0, arrow tip at -xt -yt")
+parser.add_argument("-arrowcol",dest="arrowcol", action="append",
+                   help="Arrow color at position -xt0,-yt0, arrow tip at -xt -yt")
+parser.add_argument("-arrowlw",dest="arrowlw", type=float, action="append", 
+                   help="Arrow line width")
 parser.add_argument("-fxy",dest="fxy",
                          help="File containing xy graph")
 
@@ -208,15 +224,65 @@ fig =pl.figure()
 #pl.xlim(o1,o1+d1*(n1-1))
 #pl.ylim(o2+d2*(n2-1),o2)
 
-#Plot marker
+#Plot textbox
 if args.textbox is not None :
+  if args.xb0 is None: 
+    print("Missing textbox x0 coordinate")    
+    exit()
+  print(args.xb)
+
   i=0
   for text in args.textbox :
-    x=args.x[i]; y=args.y[i]; x0=args.x0[i]; y0=args.y0[i]; 
+    x0=args.xb0[i]; y0=args.yb0[i]; 
+
+    if args.xb is None:
+      x=x0
+    else : 
+      x=args.xb[i]; 
+
+    if args.yb is None:
+      y=y0
+    else : 
+      y=args.yb[i]; 
+
+    if x is None:
+      x=x0;
+    if y is None:
+      y=y0
 
     pl.annotate(text ,xy=(x,y),
               xytext=(x0,y0),bbox=dict(ec='black',fc='white', pad=5),
               arrowprops=dict(arrowstyle="->"))
+    i=i+1
+  
+#Plot text
+if args.text is not None :
+  i=0
+  for txt in args.text :
+    x=args.xt[i]; y=args.yt[i]; x0=args.xt0[i]; y0=args.yt0[i]; 
+
+    if x is None:
+      x=x0;
+    if y is None:
+      y=y0
+
+    if(args.arrowcol is None):
+      acol="black"
+    else :
+      acol=args.arrowcol[i]
+    if(args.textcol is None):
+      tcol="black"
+    else :
+      tcol=args.textcol[i]
+    if(args.arrowlw is None):
+      alw=2.0
+    else :
+      alw=args.arrowlw[i]
+
+    pl.annotate(txt ,xy=(x,y),
+              xytext=(x0,y0),
+              arrowprops=dict(arrowstyle="->",color=acol, lw=alw),
+              color=tcol)
     i=i+1
   
 #Plot grah

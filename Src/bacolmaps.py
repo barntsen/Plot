@@ -14,7 +14,7 @@ def cmap(name) :
     name: ='crust' or None
   '''
 
-  path="/home/barn/Dropbox/Src/Python/Utils/Cmaps/"
+  path="/home/barn/Dropbox/Src/Plot/Cmaps/"
   if name == 'crust' :
     clist =    get_hex_list(hex_list=1)
     bacmap =  get_continuous_cmap(clist)
