@@ -1,3 +1,7 @@
+
+# Plot is a small package for plotting seismic data and velocity models.
+
+## The sub directories
 The Bin directory contain python scripts which can be executed directly
 The Src directory contain python source. Run the ./mk.sh script in Src to
 install the scripts in Bin if you change the code in Src.

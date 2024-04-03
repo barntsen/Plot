@@ -194,3 +194,25 @@ def comargs(parser) :
   return parser
 
 
+def circle( origin, r, theta=(0,2*3.14159,0.001) ):
+  ''' Create a circle                      
+  
+    Parameters:
+      origin:   tupple with x,y coordinates of circel origin
+      r     :   radius of circle
+      theta :   Optional argument for the angle range of the circle
+                and resolution. theta=(0, 2*pi, dtheta)
+
+  '''
+  angle = np.arange(theta[0],theta[1],theta[2])
+  print(theta)
+  x=np.zeros(len(angle))
+  y=np.zeros(len(angle))
+
+  x = r*np.cos(angle)
+  y = r*np.sin(angle)
+
+  
+
+  return((x,y))    
+  
