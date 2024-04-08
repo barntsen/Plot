@@ -22,6 +22,10 @@ for i, arg in enumerate(sys.argv):
 
 # Heading
 parser = argparse.ArgumentParser(description="Script for plotting  2D seismic data and velocity models")
+
+# Get common command line arguments
+comargs(parser)
+
 parser.add_argument("-xb0",type=float,action="append",
                          help="Textbox x-ccordinate")
 parser.add_argument("-yb0",type=float,action="append",
@@ -96,7 +100,9 @@ parula.setcolors()
 
 
 #Get the data
-data =getdata(args.fname,n1,n2)
+data =getdata(args.fname,args,n1,n2)
+
+print("DEBUG : ", args.o1)
 
 #Get the background image 
 if args.fb is not None :

@@ -31,7 +31,7 @@ def eprint(*args):
   print(*args, file=sys.stderr)  
   sys.exit(1)
 
-def getdata(fname, n1=0, n2=0) :
+def getdata(fname, args, n1=0, n2=0) :
     """ Read data in binary, su or rss format"""
 
     #Get file extension
@@ -49,6 +49,10 @@ def getdata(fname, n1=0, n2=0) :
       print("geomN: ", rsfile.geomN)
       n1 = rsfile.geomN[0][0]
       n2 = rsfile.geomN[2][0]
+      args.d1 = rsfile.geomD[0][0]
+      args.d2 = rsfile.geomD[2][0]
+      o1 = rsfile.geomO[0][0]
+      o2 = rsfile.geomO[2][0]
       if(rsfile.type == 2):
         n1 = rsfile.geomN[0][0]
         n2 = rsfile.geomN[1][0]
