@@ -58,37 +58,6 @@ parser.add_argument("-fxy",dest="fxy",
 #Parse arguments
 args = parser.parse_args()
 
-# Axis
-if args.n1 is not None:
-    n1 = args.n1
-else :
-    n1 = -1
-
-if args.d1 is not None:
-    d1 = args.d1
-else :
-    d1 = 1.0
-
-if args.o1 is not None:
-    o1 = args.o1
-else :
-    o1 = 0.0
-
-if args.n2 is not None:
-    n2 = args.n2
-else :
-    n2 = -1
-
-if args.d2 is not None:
-    d2 = args.d2
-else :
-    d2 = 1.0
-
-if args.o2 is not None:
-    o2 = args.o2
-else :
-    o2 = 0.0
-
 if args.t is True:
     transp = 1;
 else:
@@ -100,9 +69,39 @@ parula.setcolors()
 
 
 #Get the data
-data =getdata(args.fname,args,n1,n2)
+dims = [0,0,0.0,0.0,0.0,0.0]
 
-print("DEBUG : ", args.o1)
+#n1 and n2 are needed in case of binary format
+if(args.n1 is not None):
+  dims[0] = args.n1
+if(args.n2 is not None):
+  dims[1] = args.n2
+
+data =getdata(args.fname,dims)
+
+n1 = dims[0]
+n2 = dims[1]
+
+if(args.d1 is None):
+  d1 = dims[2]
+else :
+  d1 = args.d1
+
+if(args.d2 is None):
+  d2 = dims[3]
+else :
+  d2 = args.d2
+
+if(args.o1 is None):
+  o1 = dims[4]
+else :
+  o1 = args.o1
+
+if(args.o2 is None):
+  o2 = dims[5]
+else :
+  o2 = args.o2
+
 
 #Get the background image 
 if args.fb is not None :
@@ -168,10 +167,6 @@ if args.bias is not None:
 #-----------------------------------------------------------------------
 fig =pl.figure()
 
-
-#pl.xlim(o1,o1+d1*(n1-1))
-#pl.ylim(o2+d2*(n2-1),o2)
-
 #Plot textbox
 if args.textbox is not None :
   if args.xb0 is None: 
@@ -232,21 +227,29 @@ if args.text is not None :
               arrowprops=dict(arrowstyle="->",color=acol, lw=alw),
               color=tcol)
     i=i+1
-  
-#Plot grah
-if args.fxy is not None:
-   pl.plot(gx,gy)
 
 #Plot data array
 data=np.clip(data,cmin,cmax)
+
+print("n1: ", n1)
+print("n2: ", n2)
+print("d1: ", d1)
+print("d2: ", d2)
+print("o1: ", o1)
+print("o2: ", o2)
+ll = o1
+lw = o1+d1*n1
+ur = o2
+lh = o2+d2*n2
+
+
 im=pl.imshow(data,clim=(cmin,cmax),cmap=args.colormap,
-          extent=[o1,o1+d1*n1,o2+d2*n2,o2])  
+          extent=[ll,lw,lh,ur])  
 
 #Plot also background array
 if args.fb is not None :
     pl.imshow(bg,alpha=args.trans,cmap=cmap_vp,
               extent=[o1,o1+d1*n1,o2+d2*n2,o2],interpolation='spline36')  
-
 
 #Set aspect ratio
 ax=pl.gca()

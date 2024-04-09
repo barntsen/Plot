@@ -31,7 +31,7 @@ def eprint(*args):
   print(*args, file=sys.stderr)  
   sys.exit(1)
 
-def getdata(fname, args, n1=0, n2=0) :
+def getdata(fname, dims) :
     """ Read data in binary, su or rss format"""
 
     #Get file extension
@@ -40,26 +40,26 @@ def getdata(fname, args, n1=0, n2=0) :
 
     if format == '.bin' :
       fin = ba.bin(fname)
-      if (n1 == 0) or (n2 == 0) :
+      if (dims[0] == 0) or (dims[1] == 0) :
         eprint("n1 or n2 or both are zero")
       data=fin.read((n2,n1))
     elif format == '.rss' :
       rsfile = rs.RSSdata()
       rsfile.read(fname)
       print("geomN: ", rsfile.geomN)
-      n1 = rsfile.geomN[0][0]
-      n2 = rsfile.geomN[2][0]
-      args.d1 = rsfile.geomD[0][0]
-      args.d2 = rsfile.geomD[2][0]
-      o1 = rsfile.geomO[0][0]
-      o2 = rsfile.geomO[2][0]
+      dims[0] = rsfile.geomN[0][0]
+      dims[1] = rsfile.geomN[2][0]
+      dims[2] = rsfile.geomD[0][0]
+      dims[3] = rsfile.geomD[2][0]
+      dims[4] = rsfile.geomO[0][0]
+      dims[5] = rsfile.geomO[2][0]
       if(rsfile.type == 2):
-        n1 = rsfile.geomN[0][0]
-        n2 = rsfile.geomN[1][0]
+        dims[0] = rsfile.geomN[0][0]
+        dims[1] = rsfile.geomN[1][0]
       if(rsfile.type == 3):
         print("image: 3D data can not be plotted")
       
-      data = np.reshape(rsfile.data,[n1,n2])
+      data = np.reshape(rsfile.data,[dims[0],dims[1]])
       data = np.transpose(data)
       
     elif format == '.su' :
@@ -67,6 +67,13 @@ def getdata(fname, args, n1=0, n2=0) :
       trhds,traces = segy.readtrs(fp,-1,"su")
       ntr = len(trhds)
       data = np.transpose(traces)
+      dims[0] = trhds.n1
+      dims[1] = trhds.n2
+      dims[2] = trhds.d1
+      dims[3] = trhds.d2
+      dims[4] = trhds.o1
+      dims[5] = trhds.o2
+
     else :
       eprint("image : Unknown data format") 
     return data
@@ -170,17 +177,17 @@ def comargs(parser) :
                         help="percentile clip in percentage (default 99)")
   parser.add_argument("-clip",dest="clip",type=float,
                         help="clip in percentage of max value")
-  parser.add_argument("-n1",dest="n1",type=int,default=-1,
+  parser.add_argument("-n1",dest="n1",type=int,
                         help="First dimension of data")
-  parser.add_argument("-n2",dest="n2",type=int,default=-1,
+  parser.add_argument("-n2",dest="n2",type=int,
                         help="Second dimension of data")
-  parser.add_argument("-d1",dest="d1",type=float,default=1.0,
+  parser.add_argument("-d1",dest="d1",type=float,
                         help="First dimension sampling interval")
-  parser.add_argument("-d2",dest="d2",type=float,default=1.0,
+  parser.add_argument("-d2",dest="d2",type=float,
                         help="Second dimension sampling interval")
-  parser.add_argument("-o1",dest="o1",type=float,default=0.0,
+  parser.add_argument("-o1",dest="o1",type=float,
                         help="First dimension origo")
-  parser.add_argument("-o2",dest="o2",type=float,default=0.0,
+  parser.add_argument("-o2",dest="o2",type=float,
                         help="Second dimension origo")
   parser.add_argument("-t",dest="t",action='store_true',
                         help="transpose data if this option is present")
